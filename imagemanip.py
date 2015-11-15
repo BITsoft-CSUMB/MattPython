@@ -441,7 +441,31 @@ def makeCollage():
   return finalImage
   
 
+# Function: Make a collage with dragons, fire balls, and a drone
+# Params: none, you can't negotiate with dragons
+# Returns: final image
+def makeCardThanksgiving():
+  greenScreen = [50, 255, 50] # R G B values for green screen
+  colorPrecision = 100 # how close the colors has to be to remove the alpha
+  background = makePicture(getMediaPath("fatTurkey.jpg"))
+  santas = makePicture(getMediaPath("santa.jpg"))
+  dragon = makePicture(getMediaPath("dinosaur.jpg"))
+  flamethrower = makePicture(getMediaPath("flamethrower.jpg"))
   
+  textA = "Happy Thanksgiving! No, it's not Christmas yet."
+  textB = "-Matt"
+  
+  pyCopyA(santas, background, 0, 290, greenScreen[0], greenScreen[1], greenScreen[2], 200)    
+  pyCopyA(flamethrower, background, 140, 510, greenScreen[0], greenScreen[1], greenScreen[2], 200)    
+  pyCopyA(dragon, background, -500, 400, greenScreen[0], greenScreen[1], greenScreen[2], 200)    
+
+  addTextWithStyle(background, 60, 381, textA, makeStyle(serif, bold, 24))
+  addTextWithStyle(background, 371, 420, textB, makeStyle(serif, bold, 24))
+  
+  return background
+  
+
+
   
 #---------------- Green screen test
 #foreground = makePicture("C:\Matt\CSUMB\Project1\collage\\scifiShip.jpg")
@@ -463,11 +487,7 @@ def makeCollage():
  
 #setMediaPath is critical so you don't look like a noob and have file paths all over the program
 setMediaPath()
-
-artPic = makePicture(getMediaPath("backgroundTest.jpg"))
-artPic = sepia(artPic)
-#artPic = betterBnW(artPic)
-show(artPic)
-
+card = makeCardThanksgiving()
+show(card)
 
 
