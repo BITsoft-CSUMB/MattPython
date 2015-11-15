@@ -2,7 +2,7 @@
 
 # Image manipulation functions 
 # Written by: Matthew Valancy
-test
+
 # ---------------------------------------------- Function header template -------------------------------------
 
 # Function: What does it do
@@ -406,14 +406,14 @@ def makeCollage():
   colorPrecision = 150 # how close the colors has to be to remove the alpha
   
   # Load up all images before we start the party
-  background = makePicture("C:\Matt\CSUMB\Project1\collage\\background.jpg")
-  title = makePicture("C:\Matt\CSUMB\Project1\collage\\title.jpg")
-  moon = makePicture("C:\Matt\CSUMB\Project1\collage\\moon.jpg")
-  dinosaur = makePicture("C:\Matt\CSUMB\Project1\collage\\dinosaur.jpg")
-  fireballA = makePicture("C:\Matt\CSUMB\Project1\collage\\fireball.jpg")
-  treeA = makePicture("C:\Matt\CSUMB\Project1\collage\\tree1.jpg")
-  treeB = makePicture("C:\Matt\CSUMB\Project1\collage\\tree2.jpg")
-  treeC = makePicture("C:\Matt\CSUMB\Project1\collage\\tree3.jpg")
+  background = makePicture(getMediaPath("background.jpg"))
+  title = makePicture(getMediaPath("title.jpg"))
+  moon = makePicture(getMediaPath("moon.jpg"))
+  dinosaur = makePicture(getMediaPath("dinosaur.jpg"))
+  fireballA = makePicture(getMediaPath("fireball.jpg"))
+  treeA = makePicture(getMediaPath("tree1.jpg"))
+  treeB = makePicture(getMediaPath("tree2.jpg"))
+  treeC = makePicture(getMediaPath("tree3.jpg"))
   
   # Do secondary processing to images to generate additional assets
   smallDinoA = shrink(dinosaur)
@@ -460,11 +460,11 @@ def makeCollage():
 #pyCopy(sourcePic, targetPic, 500, 20)
 #show(targetPic)
 #print "processing time:" + str(time.time() - startTime)
-abspath = os.path.abspath(sys.argv[0])
-dname = os.path.dirname(abspath)
-print(dname)
-os.chdir(dname)
-artPic = makePicture("\images\\backgroundTest.jpg")
+ 
+#setMediaPath is critical so you don't look like a noob and have file paths all over the program
+setMediaPath()
+
+artPic = makePicture(getMediaPath("backgroundTest.jpg"))
 artPic = sepia(artPic)
 #artPic = betterBnW(artPic)
 show(artPic)
