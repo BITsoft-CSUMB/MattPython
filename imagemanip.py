@@ -73,13 +73,14 @@ def roseColoredGlasses(sourcePic):
     b = getBlue(p)
     g = getGreen(p)
     setGreen(p, g * 0.3)
-    setRed(p, 255 - r)
-    setBlue(p, 255 - b)
+#    setRed(p, 255 - r)
+ #  setBlue(p, 255 - b)
   return retPic
 
 
 # Function: makes a color lighter
-# Params: multiplies color by 1.5
+# Params: multiplies color by 1.
+5
 # Returns:  new, brighter color
 def makeLighter(oldColor):
   return oldColor * 1.5
@@ -393,6 +394,40 @@ def chromaKey(foreground, background):
   pyCopyA(foreground, retPic, 0, 0, greenScreen[0], greenScreen[1], greenScreen[2], colorPrecision)  
   return retPic
 
+# Function: Line trace an image based on illuminance of bottom and right pixel
+# Params: source pic to trace and minimum difference between abs(core - bot) and abs(core-right)
+# Returns: black and white line traced pic
+def lineTrace(sourcePic, dif):
+  width = sourcePic.getWidth()
+  height = sourcePic.getHeight()
+  retPic = makeEmptyPicture(width, height)
+
+  #white = makeColor(255,255,255)
+  #black = makeColor(0,0,0)
+  
+  xMax = width  - 1
+  yMax = height - 1
+  
+  for x in range(0, xMax):
+    for y in range(0, yMax):
+      if (y + 1 < yMax) and (x + 1 < xMax):
+          corePixel = sourcePic.getPixel(x, y).getColor()
+          botPixel =  sourcePic.getPixel(x, y + 1 ).getColor()
+          rightPixel = sourcePic.getPixel(x + 1, y).getColor()
+
+          coreLum = corePixel.red + corePixel.blue + corePixel.green
+          botLum = botPixel.red + botPixel.blue + botPixel.green
+          rightLum = rightPixel.red + rightPixel.blue + rightPixel.green
+          if (abs(coreLum - botLum) < dif) and (abs(coreLum - rightLum) < dif) :
+            setColor(retPic.getPixel(x,y), white)
+          else:
+            setColor(retPic.getPixel(x,y), black)
+      else:
+        setColor(retPic.getPixel(x, y), white)   # just make it white if we hit the end, no big deal
+
+  return retPic
+
+
 
 # ---------------------------------------------- Test code section --------------------------------------
 
@@ -441,7 +476,7 @@ def makeCollage():
   return finalImage
   
 
-# Function: Make a collage with dragons, fire balls, and a drone
+# Function: Make thanksgiving card
 # Params: none, you can't negotiate with dragons
 # Returns: final image
 def makeCardThanksgiving():
@@ -487,7 +522,11 @@ def makeCardThanksgiving():
  
 #setMediaPath is critical so you don't look like a noob and have file paths all over the program
 setMediaPath()
-card = makeCardThanksgiving()
-show(card)
 
+#show(roseColoredGlasses(makePicture(getMediaPath("glasses.jpg"))))
+#show(makeNegative(makePicture(getMediaPath("cialogo.png"))))
+#show(betterBnW(makePicture(getMediaPath("mrrogers.jpg"))))
+#show(mirrorVertical(makePicture(getMediaPath("pyramid.jpg")), true))
+show(lineTrace(makePicture(getMediaPath("glasses.jpg")), 50))
+#show(makeCardThanksgiving())
 
