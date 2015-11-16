@@ -180,32 +180,34 @@ def sepia(sourcePic):
   return retPic
 
 
-# Function: Sepia colorize
+# Function: Artify colorize
 # Params: source image
-# Returns: Sepia picture
+# Returns: artify picture
 def artify(sourcePic):
   retPic = duplicatePicture(sourcePic)
-  
   pixels = getPixels(retPic)
+  
   for p in pixels:
-    r = getRed(p)
-    b = getBlue(p)
-    g = getGreen(p)
-    for color in [r, b, g]:
-      if color < 64:
-         color = 31
-      elif color < 128:
-        color = 95
-      elif color < 192:
-        color = 159
-      else:
-        color = 223        
-    setRed(p, r)
-    setBlue(p, b)
-    setGreen(p, g)
-    
+    setRed(p, artifyChk(getRed(p)))
+    setBlue(p, artifyChk(getBlue(p)))
+    setGreen(p, artifyChk(getGreen(p)))
+  
   return retPic
 
+# Function: Artify color binning
+# Params: source color value 0 - 255
+# Returns: binned value 31, 95, 159, or 223
+def artifyChk(color):
+   if color < 64:
+     color = 31
+   elif color < 128:
+     color = 95
+   elif color < 192:
+     color = 159
+   else:
+     color = 223  
+
+   return color   
 
 # Function: Horizontal image mirroring
 # Params: 1) an image, 2) bool value for True mirrors left to right, False mirrors right to left
@@ -394,6 +396,7 @@ def chromaKey(foreground, background):
   pyCopyA(foreground, retPic, 0, 0, greenScreen[0], greenScreen[1], greenScreen[2], colorPrecision)  
   return retPic
 
+
 # Function: Line trace an image based on illuminance of bottom and right pixel
 # Params: source pic to trace and minimum difference between abs(core - bot) and abs(core-right)
 # Returns: black and white line traced pic
@@ -527,6 +530,8 @@ setMediaPath()
 #show(makeNegative(makePicture(getMediaPath("cialogo.png"))))
 #show(betterBnW(makePicture(getMediaPath("mrrogers.jpg"))))
 #show(mirrorVertical(makePicture(getMediaPath("pyramid.jpg")), true))
-show(lineTrace(makePicture(getMediaPath("glasses.jpg")), 50))
+#show(lineTrace(makePicture(getMediaPath("glasses.jpg")), 50))
+glasses = artify(makePicture(getMediaPath("hq.jpg")))
+show(glasses)
 #show(makeCardThanksgiving())
 
