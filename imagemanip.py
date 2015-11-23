@@ -14,19 +14,23 @@
 
 import time # for measuring execution time during tests
 import os
+from media import *
+
+def makeEmptyPicture():
+
 
 # ----------------------------------------------    Coloring Functions   --------------------------------------
 
 # Function: No blue removes blue from a picture 
 # Params: source picture
 # Returns: picture without blue
-def noBlue(sourcePic):
-  retPic = duplicatePicture(sourcePic)
-  pixels = getPixels(retPic)
-  for p in pixels:
-    setBlue(p,0)
-  return retPic
-
+#def noBlue(sourcePic):
+#  retPic = duplicatePicture(sourcePic)
+#  pixels = getPixels(retPic)
+ # for p in pixels:
+ #   setBlue(p,0)
+ # return retPic
+#'''
 
 # Function: half red reduces the red in a picture by half
 # Params: source picture
