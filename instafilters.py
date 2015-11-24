@@ -34,12 +34,24 @@ try:
 except ValueError: 
    print "mediaPath:" + setMediaPath()
 
-oceanLightPic = "geometric.jpg"
+# By listing our assets in arrays we can perform automated testing and generate randomized images
+# It makes maintenance easier too
+testPics     = ["mrrogers.jpg", "hq.jpg", "mattreg.jpg", "mattShirt.jpg", "mattTesla.jpg", "putin.jpg"] 
+oceanLights  = ["lightrays1.jpg", "lightrays2.jpg", "lightrays3.jpg", "lightrays4.jpg", "lightrays5.jpg"]
+oceanFish    = ["fish1.jpg", "fish2.jpg"]
+oceanKelp    = []
+fungalLights = ["geometric1.jpg", "geometric2.jpg", "geometric3.jpg", "geometric4.png", "geometric5.jpg"]
+fungalMush   = ["mushroom1.jpg", "mushroom2.jpg"]
+
+
+
 
 # ------------------------------------------------------------------------------------------------------------  
 # ----------------------------------------------      Library imports    -------------------------------------
 # ------------------------------------------------------------------------------------------------------------
 import media
+import random
+random.seed()
 #from imagemanip import *
 #import mattlib.imagemanip
 #!!! JES seems jacked so I am giving up on custom libraries
@@ -57,24 +69,18 @@ def scaleMatch(fixedPic, rescalePic):
    fHeight = float(fixedPic.getHeight())
    rWidth  = float(rescalePic.getWidth())
    rHeight = float(rescalePic.getHeight())
-   #retPic = makeEmptyPicture(int(fWidth), int(fHeight))
   
    scale = 0
    # meat and potatoes, figure out how we want to scale the picture, will scaling the height leave the width too small etc
    # first compare the height, is the picture to resize bigger or smaller than the fixed pic?
    if(rHeight < fHeight): 
-      scale = (rHeight / fHeight) + 1.0
-      showInformation("1: " + str(scale))
+      scale = (rHeight / fHeight) + 1.0  
       if( (rWidth * scale) < fWidth):  #what happens to the width if you apply scale, will it make it too small?
          scale = (rWidth / fWidth) + 1.0
-         showInformation("2: " + str(scale))
    else: 
       scale = 1.0/(rHeight/fHeight) 
-      showInformation("3: " + str(scale))
       if( rWidth * scale < fWidth):
-         scale = fWidth / rWidth + 1.0
-         showInformation("4: " + str(scale))
-         
+         scale = fWidth / rWidth + 1.0        
 
    # convert to regular % like 90% 110% etc
    scale = (scale * 100.0) # oversize by 10% to account for rounding errors
@@ -86,21 +92,26 @@ def scaleMatch(fixedPic, rescalePic):
    # now trim the fat off the sides of the picture
    xTrim = int((retPicWidth - fWidth) / 2.0)   
    retPic = crop (retPic, xTrim, retPicWidth - xTrim, 0, int(fHeight))
-   
    return retPic
 
+# Function: Crop a picture 
+# Params: sourcePic to crop, starting and ending x co-ordinates, starting and ending y co-ordinates
+# Returns: Cropped picture
 def crop(sourcePic, xStart, xEnd, yStart, yEnd):
    retPicWidth = xEnd - xStart
    retPicHeight = yEnd - yStart
+   sourcePicWidth = sourcePic.getWidth()
+   sourcePicHeight = sourcePic.getHeight()
+
    retPic = makeEmptyPicture(retPicWidth, retPicHeight)
-  
+   
    targetX = 0
    targetY = 0
    
    for sourceY in range(yStart, yEnd):
       targetX = 0
       for sourceX in range(xStart, xEnd):
-         if(targetX < retPicWidth and targetY < retPicHeight):
+         if(targetX < retPicWidth and targetY < retPicHeight and sourceX < sourcePicWidth and sourceY < sourcePicHeight):
             sourcePixel = getPixel(sourcePic, sourceX, sourceY)
             targetPixel = getPixel(retPic, targetX, targetY)
             setColor(targetPixel, getColor(sourcePixel))
@@ -139,7 +150,6 @@ def resize(sourcePic, percent):
       
       skip = int(round(1/scaleFactor)) # skip count go by 1, 2, 3, etc.
       
-      showInformation(str(skip))
       for sourceY in range(0, sourceHeight, skip):
          destX = 0
          for sourceX in range(0, sourceWidth, skip):
@@ -149,8 +159,7 @@ def resize(sourcePic, percent):
                setColor(destPixel, getColor(sourcePixel))
             destX += 1     
          destY += 1
-         
-        
+      
    else: #Enlarge is the opposite of shrink, we duplicate pixels from source to destination and only increment soureX or source Y every destX%skip or destY%skip
       heightRatio = destHeight / sourceHeight
       widthRatio  = destWidth  / sourceWidth
@@ -163,8 +172,7 @@ def resize(sourcePic, percent):
                for destY in range(0, heightRatio):
                   destPixel = getPixel(retPic, widthRatio * sourceX + destX, heightRatio * sourceY + destY)
                   setColor(destPixel, sourceColor)
-            
-     
+       
    return retPic
 
 
@@ -238,6 +246,18 @@ def pyCopyA(source, target, targetX, targetY, alphaR, alphaG, alphaB, precision)
             destPixel.setColor(sourceColor)          
 
 
+# Function: Add Border
+# Params: Source picture, border thickness, border color
+# Returns: picture with new border
+def addBorder(sourcePic, thickness, color):
+   retPic = duplicatePicture(sourcePic)
+   width = sourcePic.getWidth()
+   height = sourcePic.getHeight()
+   addRectFilled(retPic, 0, 0, width, thickness, color)       # top side
+   addRectFilled(retPic, 0, 0, thickness, height, color) # left side
+   addRectFilled(retPic, width - thickness, 0, thickness, height, color)  # right side
+   addRectFilled(retPic, 0, height - thickness, width, thickness, color) # bottom side
+   return retPic
 # ------------------------------------------------------------------------------------------------------------
 # ---------------------------------------------- Filter 1 - under the C...sumb (scuba) -----------------------
 # ------------------------------------------------------------------------------------------------------------
@@ -250,48 +270,41 @@ def oceanColor(sourcePic):
   retPic = duplicatePicture(sourcePic)
   pixels = getPixels(retPic)
   for p in pixels:
-     setRed(p, getRed(p) * 0.3)
-     setGreen(p, getGreen(p) * 0.6)
+     setRed(p, getRed(p) * 0.6)
+     setGreen(p, getGreen(p) * 0.7)
   return retPic
 
 # Function: IMAGE TEXTURIZE, Applies lighting and water artificts like bubbles and specks
 # Params: Source picture
-# Returns: Picture with light and particle effectsmakeEmptyPicture(
+# Returns: Picture with light and particle effects
 def oceanLight(sourcePic):
-  retPic = duplicatePicture(sourcePic)
-  lightPic = makeImage( getMediaPath(oceanLightPic) )
-
-  
-  sWidth = sourcePic.getWidth()
-  sHeight = sourcePic.getHeight()
-  lWidth = lightPic.getWidth()
-  lHeight = lightPic.getHeight()
-
-  
-  
+  lightSelection = random.randint(0,len(oceanLights) - 1) # pick a random lighting effect from the list
+  lightPic = makePicture( getMediaPath(oceanLights[lightSelection]))
+  return smartBlend(sourcePic, lightPic, 50)
 
 # Function: Add kelp to an image
 # Params: Source picture
 # Returns: Picture with kelp added
 def addKelp(sourcePic):
-   test = 0
+   return sourcePic
 
 
 # Function: Add fish
 # Params: Source picture
 # Returns:Picture with fish added
 def addFish(sourcePic):
-   test = 0
+   return sourcePic
 
 
 # Function: Applies scuba themed filter to source picture
 # Params: Source picture
 # Returns: Scuba themed pic
 def scubaFilter(sourcePic):
-   retpic = oceanColor(sourcePic)
-   retPic = oceanLight(sourcePic)
-   retPic = addKelp(sourcePic)
-   retPic = addFish(sourcePic)
+   retPic = oceanColor(sourcePic)
+   retPic = oceanLight(retPic)
+   retPic = addKelp(retPic)
+   retPic = addFish(retPic)
+   retPic = addBorder(retPic, 20, makeColor(11, 17, 75))
    return retPic
 
 # ------------------------------------------------------------------------------------------------------------
@@ -303,52 +316,59 @@ def scubaFilter(sourcePic):
 # Returns: Picture with color adjustment
 # Reference for absorption underwater: http://www.scuba-tutor.com/dive-physics/water-density/color-absorption.php
 def fungalColor(sourcePic):
-  retPic = duplicatePicture(sourcePic)
-  pixels = getPixels(retPic)
-  for p in pixels:
-     setRed(p, getRed(p) * 0.3)
-     setGreen(p, getGreen(p) * 0.6)
-  return retPic
+   retPic = duplicatePicture(sourcePic)
+   pixels = getPixels(retPic)
+   blueMulti = random.randint(10,90) / 100.0
+   redMulti = random.randint(10,90) / 100.0
+   greenMulti = random.randint(10,90) / 100.0
+   for p in pixels:
+      setRed(p, getBlue(p) * redMulti)
+      setBlue(p, getBlue(p) * blueMulti)
+      setGreen(p, getGreen(p) * greenMulti)
+   return retPic
 
 # Function: Applies lighting effects with a fungal theme
 # Params: Source picture
 # Returns: Picture with light and particle effects
-def fungalLght(sourcePic):
-  retPic = duplicatePicture(sourcePic)
+def fungalEffect(sourcePic):
+  lightSelection = random.randint(0,len(fungalLights) - 1) # pick a random lighting effect from the list
+  lightingPic = makePicture(getMediaPath(fungalLights[lightSelection]))
+  return smartBlend(sourcePic, lightingPic, 40)
 
   
-# Function: Applies lighting and 
+# Function: Add some funky mushrooms! 
 # Params: Source picture
-# Returns: Picture with light and particle effects
+# Returns: Picture with mushrooms added
 def addMushrooms(sourcePic):
-   retPic = duplicatePicture(sourcePic)
+   return sourcePic
   
-
 # Function: Applies fungal themed filter to source picture
 # Params: Source picture
 # Returns: Fungal themed pic
 def fungalFilter(sourcePic):
-  retpic = fungalColor(sourcePic)
-  retPic = fungalLight(sourcePic)
-  retPic = addMushrooms(sourcePic)
-  return retPic
+   retPic = fungalColor(sourcePic)
+   retPic = fungalEffect(retPic)
+   #retPic = addMushrooms(retPic)
+   retPic = addBorder(retPic, 20, makeColor(random.randint(125,255), random.randint(125,255), random.randint(125,255)))
+   return retPic
 
 # ------------------------------------------------------------------------------------------------------------
 # ----------------------------------------------      Filter Tests      --------------------------------------
 # ------------------------------------------------------------------------------------------------------------
-def scubaTest():
-   testPic = makePicture(getMediaPath("mrrogers.jpg"))
-   #testPic = oceanColor(testPic)
-   lightPic = makePicture(getMediaPath(oceanLightPic))
-   show(smartBlend(testPic, lightPic, 40))
+def scubaTest(testSamples):
+   for count in range(0,testSamples):
+      source = testPics[random.randint(0,len(testPics) - 1)]
+      testPic = makePicture(getMediaPath(source))
+      testPic = scubaFilter(testPic)
+      writePictureTo(testPic, getMediaPath("_scubaResult_" + str(count) + ".jpg")) 
+     
    
-   #show(testPic)
-   #show(lightPic)
-   #show(scaleMatch(testPic, lightPic))
-def fungusTest():
-   test = 0
-
-
+def fungusTest(testSamples):
+   for count in range(0,testSamples):
+      source = testPics[random.randint(0,len(testPics) - 1)]
+      testPic = makePicture(getMediaPath(source))
+      testPic = fungalFilter(testPic)
+      writePictureTo(testPic, getMediaPath("_fungalResult_" + str(count) + ".jpg")) 
 #try:
 #pic = duplicatePicture(pic)
 #pic = halfRed(pic) 
@@ -359,8 +379,8 @@ def fungusTest():
 # ------------------------------------------------------------------------------------------------------------
 # ----------------------------------------------   Code that runs on start of script      --------------------
 # ------------------------------------------------------------------------------------------------------------
-print "test"
-scubaTest()
-fungusTest()
+testSamples = 50
+#scubaTest(testSamples)
+fungusTest(testSamples)
 
 
